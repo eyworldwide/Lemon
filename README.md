@@ -1,6 +1,6 @@
 # Lemon
 
-A tool for compress images. Based on [Electron](http://electron.atom.io/).
+A tool for compressing images. Based on [Electron](http://electron.atom.io/).
 
 ### Screen shot 
 
