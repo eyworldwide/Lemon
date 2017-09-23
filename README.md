@@ -4,11 +4,11 @@ A tool for compress images. Based on [Electron](http://electron.atom.io/).
 
 ### Screen shot 
 
-![screenshot](./capture.png)
+![screenshot](https://raw.githubusercontent.com/eyworldwide/Lemon/master/screenshot.png)
 
 ### Usage
 
-1. Download：dist/
+1. Download：dist/Lemon.7z.
 2. Copy the app to your mac application directory.
 3. Drag the image folder (eg. `xxx`) to the software window, then it will create a new folded (named `xxx_compressed`).
 4. Select the compression quality drop-down menu and it will show the compression ratio of every image.
