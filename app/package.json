@@ -1,0 +1,11 @@
+{
+  "name": "Lemon",
+  "version": "0.0.1",
+  "main": "main.js",
+  "description": "image batch compressor",
+  "repository": "http://gitlab.alibaba-inc.com/qianwei.xqw/Lemon",
+  "dependencies": {
+    "imagemin": "^5.2.2",
+    "imagemin-pngquant": "^5.0.0"
+  }
+}
