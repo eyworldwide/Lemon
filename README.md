@@ -15,7 +15,8 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
 
 ### Features
 
- - Compress .png image in a batch.
+ - Compress .png/.jpg/.gif/.svg image in a batch.
+ - Slide to control the quality of compression.
  - Preview the image before and after when you mouse over the list.
 
 ### Change log
@@ -28,9 +29,9 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
 
  - 2017-07-23 Update to the lastest electron.
  
-#### TODO
+#### v0.0.3
 
- - support .jpg image.
+- 2016-10-14 support .jpg/.gif/.svg image.
 
 ### Licence
 

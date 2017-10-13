@@ -1,6 +1,6 @@
 {
   "name": "Lemon",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "main.js",
   "description": "image batch compressor",
   "repository": "http://gitlab.alibaba-inc.com/qianwei.xqw/Lemon",
@@ -11,7 +11,6 @@
     "imagemin-mozjpeg": "^6.0.0",
     "imagemin-optipng": "^5.2.1",
     "imagemin-pngquant": "^5.0.1",
-    "imagemin-svgo": "^5.2.2",
-    "imagemin-webp": "^4.0.0"
+    "imagemin-svgo": "^5.2.2"
   }
 }
