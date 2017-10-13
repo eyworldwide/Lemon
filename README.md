@@ -11,7 +11,7 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
 1. Download：dist/Lemon.dmg.
 2. Double click Lemon.dmg and drag Lemon to your applications.
 3. Drag the image folder (eg. `xxx`) to the software window, then it will create a new folded (named `xxx_compressed`).
-4. Select the compression quality drop-down menu and it will show the compression ratio of every image.
+4. Slide the compression quality input control and it will show the compression percent of every image.
 
 ### Features
 
