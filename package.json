@@ -4,7 +4,8 @@
   "author": "Bob",
   "scripts": {
     "start": "electron app",
-		"build": "electron-packager ./app 'Lemon' --platform=darwin --arch=x64 --electronVersion=1.8.0 --overwrite --prune --icon=./assets/app.icns --ignore=node_modules/.bin --ignore=.git --ignore=dist --ignore=node_modules/electron-* --out=dist --app-version=0.0.2 --build-version=2"
+		"build": "electron-packager ./app 'Lemon' --platform=darwin --arch=x64 --electronVersion=1.8.0 --overwrite --prune --icon=./assets/app.icns --ignore=node_modules/.bin --ignore=.git --ignore=dist --ignore=node_modules/electron-* --out=dist --app-version=0.0.3 --build-version=3",
+		"publish": "electron-installer-dmg ./dist/Lemon-darwin-x64/Lemon.app Lemon --overwrite --out=dist --icon=./assets/app.icns"
   }
 }
 

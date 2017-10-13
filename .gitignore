@@ -1,21 +1,6 @@
-.idea
-*.pyc
 *.swp
-src/build
-src/dist
-projectFilesBackup
 .DS_Store
-tmp
-*.js.map
-
-*.hosts
-
-src/configs.json
-
-*.swh
-*.iml
+dist/Lemon-darwin-x64
 
 node_modules
-UserInterfaceState.xcuserstate
-xcdebugger
 npm-debug.log
