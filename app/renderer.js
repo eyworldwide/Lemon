@@ -2,128 +2,139 @@ const fs = require('fs')
 const imagemin = require('imagemin')
 const imageminPngquant = require('imagemin-pngquant')
 
-let container = document.createElement('div')
-let docfrag = document.createDocumentFragment()
-let path = null
-let rows = null
+class App {
 
-function render(file, originalPath){
-	let row = document.createElement('div')
-	row.classList.add('tr')
-	row.setAttribute('data-path', file.path)
-	row.setAttribute('data-original-path', originalPath)
+	constructor () {
+		this.path = null
 
-	// name
-	let name = document.createElement('div')
-	name.classList.add('td')
-	row.appendChild(name)
-	name.textContent = /[^/]*$/.exec(file.path)[0]
-	
-	// size
-	let size = document.createElement('div')
-	size.classList.add('td')
-	row.appendChild(size)
-	let compressedSize = getFilesizeInKB(file.path) 
-	size.textContent = toStringKB(compressedSize)
+		this.container = document.querySelector('#container')
+		this.compress = this.compress.bind(this)
+		this.renderFile = this.renderFile.bind(this)
+		this.renderFiles = this.renderFiles.bind(this)
 
-	// save
-	let save = document.createElement('div')
-	save.classList.add('td')
-	row.appendChild(save)
-	let originalBytes = getFilesizeInKB(originalPath)
-	save.textContent = toPercent(compressedSize / originalBytes)
+		this.bindDrop()
+		this.bindSelect()
+		this.bindMouseEnter()
+	}
 
-	docfrag.appendChild(row)
-	container.appendChild(docfrag)
-}
+	renderFile(file, originalPath) {
+		let {getFilesizeInKB} = this
 
-function toPercent(num){
-	return ((num * 100) >> 0) + '%'
-}
+		let name = /[^/]*$/.exec(file.path)[0]
+		let compressedSize = getFilesizeInKB(file.path)
+		let size = this.toStringKB(compressedSize)
+		let originalBytes = getFilesizeInKB(originalPath)
+		// compressed percent
+		let percent = this.toPercent(compressedSize / originalBytes)
 
-function toStringKB(num){
-	return num.toFixed(1) + 'KB'
-}
-function getFilesizeInKB(filename) {
-	const stats = fs.statSync(filename)
-	const fileSizeInBytes = (stats.size / 1024)
-	return fileSizeInBytes
-}
+		return `
+			<div class="tr" data-path=${file.path} data-original-path=${originalPath}>
+				<div class="td">${name}</div>
+				<div class="td">${size}</div>
+				<div class="td">${percent}</div>
+			</div>
+		`
+	}
 
-function bindDrop(){
-	window.addEventListener('dragover', (e) => {
-		e.preventDefault()
-	},false)
+	renderFiles (files) {
+		let {container, renderFile} = this
+		let fileStrings = []
 
-	window.addEventListener('drop', (e) => {
-		e.preventDefault()
-		path = e.dataTransfer.files[0].path
-		compress()
-	},false)
-}
-
-function bindSelect(){
-	let quality = document.querySelector('#quality')
-
-	quality.onchange = compress
-}
-
-function compress(){
-	let select = document.querySelector('#quality')
-
-	let quality = '0-' + parseInt(select.options[select.selectedIndex].text)
-
-	imagemin([path + '/*.png'], path + '_compressed', {use: [imageminPngquant({quality: quality})]}).then((files) => {
 		files.forEach((file) => {
-			render(file, file.path.replace('_compressed', ''))
+			let fileString = renderFile(file, file.path.replace('_compressed', ''))
+			fileStrings.push(fileString)
 		})
-	})
 
-	rows.appendChild(container)
+		container.innerHTML = fileStrings.join('')
+	}
 
-	container.innerHTML = ''
-}
+	toPercent(num){
+		return ((num * 100) >> 0) + '%'
+	}
 
-function bindMouseEnter(){
-	rows = document.querySelector('#rows')
-	let previewOriginalImg = document.querySelector('#preview-original-img')
-	let previewCompressedImg = document.querySelector('#preview-compressed-img')
-	let preview = document.querySelector('#preview')
-	let currentRow; 
-	let show = false
+	toStringKB(num){
+		return num.toFixed(1) + 'KB'
+	}
 
-	rows.addEventListener('mouseleave', (e) => {
-		show = false
-		preview.style.display = 'none'
-	})
+	getFilesizeInKB(filename) {
+		const stats = fs.statSync(filename)
+		const fileSizeInBytes = (stats.size / 1024)
+		return fileSizeInBytes
+	}
 
-	rows.addEventListener('mousemove', (e) => {
-		if(!show){
-			preview.style.display = 'block'
-			show = true
-		}
+	bindDrop(){
+		window.addEventListener('dragover', (e) => {
+			e.preventDefault()
+		},false)
 
-		preview.style.edisplay = 'block'
+		window.addEventListener('drop', (e) => {
+			e.preventDefault()
+			this.path = e.dataTransfer.files[0].path
+			this.compress()
+		},false)
+	}
 
-		let target = e.target;
+	bindSelect(){
+		let quality = document.querySelector('#quality')
 
-		while(!target.matches('.tr')){
-			target = target.parentNode
-		}
-		
-		if(currentRow !== target){
-			currentRow = target
+		quality.onchange = this.compress
+	}
 
-			previewCompressedImg.src  = target.getAttribute('data-path')
-			previewOriginalImg.src = target.getAttribute('data-original-path')
-		}
+	compressPng (path, quality) {
+		let {renderFiles} = this
 
-		preview.style.transform = 'translate(' + (e.clientX+10) + 'px,'+ (10+e.clientY) + 'px)' 
-	})
+		imagemin([path + '/*.png'], path + '_compressed', {use: [imageminPngquant({quality: quality})]}).then((files) => {
+			renderFiles(files)
+		})
+	}
+
+	compress () {
+		let {path} = this
+		let select = document.querySelector('#quality')
+		let quality = '0-' + parseInt(select.options[select.selectedIndex].text)
+
+		this.compressPng(path, quality)
+	}
+
+	bindMouseEnter(){
+		let {container} = this
+		let previewOriginalImg = document.querySelector('#preview-original-img')
+		let previewCompressedImg = document.querySelector('#preview-compressed-img')
+		let preview = document.querySelector('#preview')
+		let currentRow; 
+		let show = false
+
+		container.addEventListener('mouseleave', (e) => {
+			show = false
+			preview.style.display = 'none'
+		})
+
+		container.addEventListener('mousemove', (e) => {
+			if(!show){
+				preview.style.display = 'block'
+				show = true
+			}
+
+			preview.style.edisplay = 'block'
+
+			let target = e.target;
+
+			while(!target.matches('.tr')){
+				target = target.parentNode
+			}
+			
+			if(currentRow !== target){
+				currentRow = target
+
+				previewCompressedImg.src  = target.getAttribute('data-path')
+				previewOriginalImg.src = target.getAttribute('data-original-path')
+			}
+
+			preview.style.transform = 'translate(' + (e.clientX+10) + 'px,'+ (10+e.clientY) + 'px)' 
+		})
+	}
 }
 
 window.onload = () => {
-	bindDrop()
-	bindSelect()
-	bindMouseEnter()
+	new App()
 }
