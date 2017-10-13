@@ -31,7 +31,7 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
  
 #### v0.0.3
 
-- 2016-10-14 support .jpg/.gif/.svg image.
+- 2017-10-14 support .jpg/.gif/.svg image.
 
 ### Licence
 
