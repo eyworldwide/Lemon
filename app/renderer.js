@@ -1,51 +1,109 @@
 const fs = require('fs')
 const imagemin = require('imagemin')
 const imageminPngquant = require('imagemin-pngquant')
+const imageminOptipng = require('imagemin-optipng')
+const imageminJpegtran = require('imagemin-jpegtran')
+const imageminSvgo = require('imagemin-svgo')
+const imageminGifsicle = require('imagemin-gifsicle')
+const imageminMozjpeg = require('imagemin-mozjpeg')
 
 class App {
 
 	constructor () {
-		this.path = null
+		this.plugins = {
+			jpg: function (quality) {
+				return [
+					imageminJpegtran({progressive: true}),
+					imageminMozjpeg({
+						tune: 'psnr',
+						quality: quality
+					})
+				]
+			},
+			png: function (quality) {
+				return [
+					imageminOptipng({optimizationLevel: 2}),
+					imageminPngquant({quality: quality})
+				]
+			},
+			svg: function (quality) {
+				return [
+					imageminSvgo({})
+				]
+			},
+			gif: function (quality) {
+				return [
+					imageminGifsicle()
+				]
+			}
+		}
+
+		this.qualities = {
+			png: +document.querySelector('#png-quality').value,
+			jpg: +document.querySelector('#jpg-quality').value
+		}
 
 		this.container = document.querySelector('#container')
 		this.compress = this.compress.bind(this)
 		this.renderFile = this.renderFile.bind(this)
 		this.renderFiles = this.renderFiles.bind(this)
+		this.render = this.render.bind(this)
 
 		this.bindDrop()
 		this.bindSelect()
 		this.bindMouseEnter()
 	}
 
-	renderFile(file, originalPath) {
+	renderFile(file, originalPath, format) {
 		let {getFilesizeInKB} = this
 
 		let name = /[^/]*$/.exec(file.path)[0]
 		let compressedSize = getFilesizeInKB(file.path)
 		let size = this.toStringKB(compressedSize)
-		let originalBytes = getFilesizeInKB(originalPath)
+		let originalBytes = getFilesizeInKB(originalPath, format)
 		// compressed percent
 		let percent = this.toPercent(compressedSize / originalBytes)
 
 		return `
-			<div class="tr" data-path=${file.path} data-original-path=${originalPath}>
+			<div class="tr tr-${format}" data-path=${file.path} data-original-path=${originalPath}>
 				<div class="td">${name}</div>
+				<div class="td">${format}</div>
 				<div class="td">${size}</div>
 				<div class="td">${percent}</div>
 			</div>
 		`
 	}
 
-	renderFiles (files) {
+	renderFiles (format, files) {
 		let {container, renderFile} = this
-		let fileStrings = []
+		let strs = []
 
 		files.forEach((file) => {
-			let fileString = renderFile(file, file.path.replace('_compressed', ''))
-			fileStrings.push(fileString)
+			let originalPath = file.path.replace('_compressed', '')
+			
+			let fileString = renderFile(file, originalPath, format)
+			strs.push(fileString)
 		})
 
-		container.innerHTML = fileStrings.join('')
+		return strs
+	}
+
+	render (format, files) {
+		let strs = this.renderFiles(format, files)
+		let div = document.createElement('div')
+		let domId = format + '-list'
+		let dom = document.querySelector('#' + domId)
+		let html = strs.join('')
+
+		if (dom) {
+			dom.innerHTML = html
+		} else {
+			div.innerHTML =  `
+				<div id="${domId}">${html}</div>
+			`
+			this.container.appendChild(div)
+		}
+
 	}
 
 	toPercent(num){
@@ -56,8 +114,9 @@ class App {
 		return num.toFixed(1) + 'KB'
 	}
 
-	getFilesizeInKB(filename) {
-		const stats = fs.statSync(filename)
+	getFilesizeInKB(filename, format) {
+		let stats = fs.statSync(filename)
+
 		const fileSizeInBytes = (stats.size / 1024)
 		return fileSizeInBytes
 	}
@@ -69,31 +128,46 @@ class App {
 
 		window.addEventListener('drop', (e) => {
 			e.preventDefault()
-			this.path = e.dataTransfer.files[0].path
+			let path = e.dataTransfer.files[0].path
+			this.path = path
 			this.compress()
 		},false)
 	}
 
 	bindSelect(){
-		let quality = document.querySelector('#quality')
+		let {compress, qualities} = this
 
-		quality.onchange = this.compress
+		let pngQuality = document.querySelector('#png-quality')
+		let jpgQuality = document.querySelector('#jpg-quality')
+
+		pngQuality.onchange = function(){
+			qualities.png = +pngQuality.value
+			compress('png')
+		}
+
+		jpgQuality.onchange = function(){
+			qualities.jpg = +jpgQuality.value
+			compress('jpg')
+		}
 	}
 
-	compressPng (path, quality) {
-		let {renderFiles} = this
+	/**
+	 * compress specified type, compress all kinds of images if type is undefined
+	 */
+	compress (type) {
+		let {render, plugins, qualities, path} = this
 
-		imagemin([path + '/*.png'], path + '_compressed', {use: [imageminPngquant({quality: quality})]}).then((files) => {
-			renderFiles(files)
-		})
-	}
+		for (let format in plugins) {
+			if (type && type !== format) {
+				continue
+			}
 
-	compress () {
-		let {path} = this
-		let select = document.querySelector('#quality')
-		let quality = '0-' + parseInt(select.options[select.selectedIndex].text)
-
-		this.compressPng(path, quality)
+			imagemin([path + '/*.' + format], path + '_compressed', {
+				plugins: plugins[format](qualities[format])
+			}).then((files) => {
+				render(format, files)
+			})
+		}
 	}
 
 	bindMouseEnter(){
@@ -110,6 +184,7 @@ class App {
 		})
 
 		container.addEventListener('mousemove', (e) => {
+			e.stopPropagation()
 			if(!show){
 				preview.style.display = 'block'
 				show = true
@@ -117,10 +192,14 @@ class App {
 
 			preview.style.edisplay = 'block'
 
-			let target = e.target;
+			let target = e.target
 
-			while(!target.matches('.tr')){
+			while(target.matches && !target.matches('.tr')){
 				target = target.parentNode
+			}
+
+			if (!target.matches) {
+				return
 			}
 			
 			if(currentRow !== target){

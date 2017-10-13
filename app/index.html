@@ -7,44 +7,50 @@
 		<script src="./renderer.js" type="text/javascript"></script>
 </head>
 <body>
-<div class="table">
-  <div class="tr th">
-    <div class="td">
-			<b>File</b>
-    </div>
-    <div class="td">
-      <b>Size</b>
-    </div>
-    <div class="td">
-      <b>
-				Quality
-				<select id="quality" name="quality">
-					<option value="" selected>100%</option>
-					<option value="">90%</option>
-					<option value="">80%</option>
-					<option value="">70%</option>
-					<option value="">60%</option>
-					<option value="">50%</option>
-					<option value="">40%</option>
-					<option value="">30%</option>
-					<option value="">20%</option>
-					<option value="">10%</option>
-				</select>
-			</b>
-    </div>
-  </div>
-	<div id="container" class="rows">
-	</div>
-	<div id="preview" class="preview">
-		<div class="preview-img-wrap">
-			<h4>Original</h4>
-			<img class="preview-img" id="preview-original-img" src="" alt="" />
+	<div class="table imagelist">
+		<div class="tr th">
+			<div class="td">
+				<h2>File</h2>
+			</div>
+			<div class="td">
+				<h2>Format</h2>
+			</div>
+			<div class="td">
+				<h2>Size</h2>
+			</div>
+			<div class="td">
+				<h2>Compression</h2>
+			</div>
 		</div>
-		<div class="preview-img-wrap">
-			<h4>Compressed</h4>
-			<img class="preview-img" id="preview-compressed-img" src="" alt="" />
+		<div id="container" class="rows">
+		</div>
+		<div id="preview" class="preview">
+			<div class="preview-img-wrap">
+				<h4>Original</h4>
+				<img class="preview-img" id="preview-original-img" src="" alt="" />
+			</div>
+			<div class="preview-img-wrap">
+				<h4>Compressed</h4>
+				<img class="preview-img" id="preview-compressed-img" src="" alt="" />
+			</div>
 		</div>
 	</div>
-</div>
+	<div class="settings">
+		<h2>Settings</h2>
+		<ul class="settings-list">
+			<li class="tr tr-png">
+		    <span class="td">PNG Quality</span>
+		    <span class="td">
+					<input type="range"  value="80" id="png-quality" min="10" max="100" step="10" />
+				</span>
+			</li>
+			<li class="tr tr-jpg">
+		    <span class="td">JPG Quality</span>
+		    <span class="td">
+					<input type="range" value="80" id="jpg-quality" min="10" max="100" step="10" />
+				</span>
+			</li>
+		</ul>
+	</div>
 </body>
 </html>
