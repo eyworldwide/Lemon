@@ -1,10 +1,11 @@
 {
   "name": "Lemon",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "main.js",
   "description": "image batch compressor",
   "repository": "http://gitlab.alibaba-inc.com/qianwei.xqw/Lemon",
   "dependencies": {
+    "ffmpeg": "0.0.4",
     "imagemin": "^5.3.1",
     "imagemin-gifsicle": "^5.2.0",
     "imagemin-jpegtran": "^5.0.2",

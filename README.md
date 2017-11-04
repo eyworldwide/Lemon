@@ -1,6 +1,6 @@
 # Lemon
 
-A tool for compressing images. Based on [Electron](http://electron.atom.io/).
+A tool for compressing game assets (include images and audios). Based on [Electron](http://electron.atom.io/).
 
 ### Screen shot 
 
@@ -15,7 +15,7 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
 
 ### Features
 
- - Compress .png/.jpg/.gif/.svg image in a batch.
+ - Compress .png/.jpg/.gif/.svg/.mp3/.wav in a batch.
  - Slide to control the quality of compression.
  - Preview the image before and after when you mouse over the list.
 
@@ -31,7 +31,11 @@ A tool for compressing images. Based on [Electron](http://electron.atom.io/).
  
 #### v0.0.3
 
-- 2017-10-14 support .jpg/.gif/.svg image.
+- 2017-10-14 Support .jpg/.gif/.svg image.
+
+#### v0.0.4
+
+- 2017-10-14 Support .mp3/.wav audio.
 
 ### Licence
 

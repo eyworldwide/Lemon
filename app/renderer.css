@@ -50,6 +50,14 @@ body{
 	background: #c1ffbb;
 }
 
+.tr-mp3{
+	background: #d8bbff;
+}
+
+.tr-wav{
+	background: #d8bbff;
+}
+
 .td {
   display: flex;
   flex-flow: row nowrap;
