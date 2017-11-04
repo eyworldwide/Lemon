@@ -9,6 +9,9 @@ const imageminGifsicle = require('imagemin-gifsicle')
 const imageminMozjpeg = require('imagemin-mozjpeg')
 const ffmpeg = require('ffmpeg')
 
+// to avoid `ffmpeg: command not found`. fix macos bug: https://github.com/shelljs/shelljs/issues/516
+process.env['PATH'] = '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
+
 class App {
 	constructor () {
 		this.plugins = {
@@ -178,9 +181,8 @@ class App {
 
 				process.then((audio) => {
 					// reomve audio files because the `save` API can't save force
-					try{
+					if (fs.existsSync(destFile)) {
 						fs.unlinkSync(destFile)
-					} catch (e){
 					}
 
 					audio.setAudioChannels(2)
