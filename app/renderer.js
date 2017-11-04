@@ -178,7 +178,11 @@ class App {
 
 				process.then((audio) => {
 					// reomve audio files because the `save` API can't save force
-					fs.unlinkSync(destFile)
+					try{
+						fs.unlinkSync(destFile)
+					} catch (e){
+					}
+
 					audio.setAudioChannels(2)
 						.setAudioBitRate(64)
 						.save(destFile, (error, file) => {
