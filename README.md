@@ -35,7 +35,7 @@ A tool for compressing game assets (include images and audios). Based on [Electr
 
 #### v0.0.4
 
-- 2017-10-14 Support .mp3/.wav audio.
+- 2017-11-14 Support .mp3/.wav audio.
 
 ### Licence
 
