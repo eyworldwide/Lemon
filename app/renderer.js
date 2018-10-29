@@ -1,58 +1,20 @@
 const fs = require('fs')
 const path = require('path')
-const imagemin = require('imagemin')
-const imageminPngquant = require('imagemin-pngquant')
-const imageminOptipng = require('imagemin-optipng')
-const imageminJpegtran = require('imagemin-jpegtran')
-const imageminSvgo = require('imagemin-svgo')
-const imageminGifsicle = require('imagemin-gifsicle')
-const imageminMozjpeg = require('imagemin-mozjpeg')
 const ffmpeg = require('ffmpeg')
+const imageModule = require('./modules/image')
 
 // to avoid `ffmpeg: command not found`. fix macos bug: https://github.com/shelljs/shelljs/issues/516
 process.env['PATH'] = '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
 
 class App {
 	constructor () {
-		this.plugins = {
-			jpg: function (quality) {
-				return [
-					imageminJpegtran({progressive: true}),
-					imageminMozjpeg({
-						tune: 'psnr',
-						quality: quality
-					})
-				]
-			},
-			png: function (quality) {
-				return [
-					imageminOptipng({optimizationLevel: 2}),
-					imageminPngquant({quality: quality})
-				]
-			},
-			svg: function (quality) {
-				return [
-					imageminSvgo({})
-				]
-			},
-			gif: function (quality) {
-				return [
-					imageminGifsicle()
-				]
-			},
-			audio: null
-		}
-
-		this.qualities = {
-			png: +document.querySelector('#png-quality').value,
-			jpg: +document.querySelector('#jpg-quality').value
-		}
-
 		this.container = document.querySelector('#container')
 		this.compress = this.compress.bind(this)
 		this.renderFile = this.renderFile.bind(this)
 		this.renderFiles = this.renderFiles.bind(this)
 		this.render = this.render.bind(this)
+
+		imageModule.setup()
 
 		this.bindDrop()
 		this.bindSelect()
@@ -158,111 +120,38 @@ class App {
 		}
 	}
 
-	compressAudios (src, dest) {
-		let srcFiles = fs.readdirSync(src)
-
-		let files = {
-			mp3: [],
-			wav: []
+	/**
+	 * compress specified type, compress all kinds of images if type is undefined
+	 */
+	compress (type, path) {
+		if (!path) {
+			path = this.path
 		}
 
 		let {render} = this
 
-		function renderAuidoList(isLast) {
-			if (isLast) {
-				render('mp3', files['mp3'])
-				render('wav', files['wav'])
+		imageModule.compress(type, path, (type, files) => {
+			if (!files) {
+				return
 			}
-		}
 
-		function compressSingle (srcFile, destFile, suffix, isLast) {
-			try {
-				let process = new ffmpeg(srcFile)
+			let paths = files.map((file) => {
+				return file.path
+			})
 
-				process.then((audio) => {
-					// reomve audio files because the `save` API can't save force
-					if (fs.existsSync(destFile)) {
-						fs.unlinkSync(destFile)
-					}
-
-					audio.setAudioChannels(2)
-						.setAudioBitRate(64)
-						.save(destFile, (error, file) => {
-							if (!error) {
-								console.log('Save Audio File: ' + file)
-								files[suffix].push(file)
-							}
-
-							renderAuidoList(isLast)
-						})
-				}, (err) => {
-					console.log('Compress Audio Error: ' + err)
-					renderAuidoList(isLast)
-				})
-			} catch (e) {
-				console.log('Can Not Compress Audio: ', e)
-				renderAuidoList(isLast)
-			}
-		}
-
-		let audioLength = 0
-
-		function isAudio(suffix){
-			return suffix === '.mp3' || suffix === '.wav'
-		}
-
-		srcFiles.forEach((item, i) => {
-			let srcFile = path.join(src, item)
-
-			if(fs.lstatSync(srcFile).isFile()){
-				if(isAudio(path.extname(item))){
-					audioLength++
-				}
-			}
+			render(type, paths)
 		})
 
-		srcFiles.forEach((item, i) => {
-			let srcFile = path.join(src, item)
-			let destFile = path.join(dest, item)
-			let audioIndex = 0
+		// for (let format in plugins) {
+		// 	if (type && type !== format) {
+		// 		continue
+		// 	}
 
-			if(fs.lstatSync(srcFile).isFile()){
-				let suffix = path.extname(item)
-
-				if(isAudio(suffix)){
-					compressSingle(srcFile, destFile, suffix.substring(1), !!(audioIndex === audioLength - 1))
-					audioIndex++ 
-				}
-			}
-		})
-
-	}
-
-	/**
-	 * compress specified type, compress all kinds of images if type is undefined
-	 */
-	compress (type) {
-		let {render, plugins, qualities, path} = this
-
-		for (let format in plugins) {
-			if (type && type !== format) {
-				continue
-			}
-
-			if (format === 'audio') {
-				this.compressAudios(path, path + '_compressed')
-			} else {
-				imagemin([path + '/*.' + format], path + '_compressed', {
-					plugins: plugins[format](qualities[format])
-				}).then((files) => {
-					let paths = files.map((file) => {
-						return file.path
-					})
-
-					render(format, paths)
-				})
-			}
-		}
+		// 	if (format === 'audio') {
+		// 		// this.compressAudios(path, path + '_compressed')
+		// 	} else {
+		// 	}
+		// }
 	}
 
 	bindMouseEnter(){
